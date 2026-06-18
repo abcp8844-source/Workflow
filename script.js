@@ -8,19 +8,23 @@ async function run() {
         
         const title = $('h2').first().text().trim();
         const content = $('p').first().text().trim().substring(0, 150) + "...";
-        const link = "https://nuxas-aztr.vercel.app/";
+        const link = "مزید: https://nuxas-aztr.vercel.app/";
         const message = `${title}\n\n${content}\n\n${link}`;
 
-        await axios.post(`https://graph.facebook.com/v20.0/me/feed`, null, {
+        // یہاں براہ راست پیج آئی ڈی ہے
+        const pageId = "514947098373834";
+        const url = `https://graph.facebook.com/v20.0/${pageId}/feed`;
+        
+        await axios.post(url, {
+            message: message
+        }, {
             params: {
-                message: message,
                 access_token: process.env.PAGE_ACCESS_TOKEN
             }
         });
-
-        console.log("Post success");
+        console.log("کامیابی سے پوسٹ ہو گئی!");
     } catch (error) {
-        console.error("Error:", error.response ? error.response.data : error.message);
+        console.error("ایرر:", error.response ? error.response.data : error.message);
     }
 }
 run();

@@ -1,4 +1,4 @@
-name: Auto Post Page
+name: Auto Post to Facebook
 on:
   schedule:
     - cron: '0 */6 * * *'
@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: '20' # یہاں 16 کی جگہ 20 کر دیں
+          node-version: '20'
       - name: Install
         run: npm install axios cheerio
       - name: Run

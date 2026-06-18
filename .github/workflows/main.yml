@@ -1,4 +1,4 @@
-name: Auto Post to Facebook
+name: Auto Post Page
 on:
   schedule:
     - cron: '0 */6 * * *' # ہر 6 گھنٹے بعد
@@ -9,14 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      - name: Install dependencies
+        with: {node-version: '16'}
+      - name: Install
         run: npm install axios cheerio
-      - name: Run Script
+      - name: Run
         env:
-          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
-          GROUP_ID: ${{ secrets.GROUP_ID }}
+          PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
+          PAGE_ID: ${{ secrets.PAGE_ID }}
         run: node script.js

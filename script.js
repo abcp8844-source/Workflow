@@ -1,40 +1,40 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-let lastPostedTitle = "";
-
 async function run() {
     try {
-        const { data } = await axios.get('https://nuxas-aztr.vercel.app/?t=' + new Date().getTime());
+        const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
         const $ = cheerio.load(data);
         
-        let jobLink = $('.group').first().attr('href');
-        if (!jobLink) return;
-        
-        const fullLink = "https://nuxas-aztr.vercel.app" + jobLink;
+        let targetLink = "";
+        $('.group').each((i, el) => {
+            if (i === 0) {
+                targetLink = "https://nuxas-aztr.vercel.app" + $(el).attr('href');
+            }
+        });
 
-        const { data: jobData } = await axios.get(fullLink);
+        if (!targetLink) throw new Error("No job link found");
+
+        const { data: jobData } = await axios.get(targetLink);
         const $$ = cheerio.load(jobData);
 
         const title = $$('h1').text().trim() || $$('h2').first().text().trim();
         const fullDesc = $$('p').text().trim();
         const shortDesc = fullDesc.substring(0, 150).trim() + "...";
-        const imageUrl = $$('img').first().attr('src');
+        
+        if (!title) throw new Error("Title not found");
 
-        if (title === lastPostedTitle) return;
+        const message = `${title}\n\n${shortDesc}\n\nApply here: ${targetLink}`;
 
-        const message = `${title}\n\n${shortDesc}\n\nApply here: ${fullLink}`;
-
-        const pageId = "514947098373834";
-        const url = `https://graph.facebook.com/v20.0/${pageId}/feed`;
+        const url = `https://graph.facebook.com/v20.0/${process.env.PAGE_ID}/feed`;
 
         await axios.post(url, {
             message: message,
-            link: fullLink,
+            link: targetLink,
             access_token: process.env.PAGE_ACCESS_TOKEN
         });
 
-        lastPostedTitle = title;
+        console.log("Post successful");
     } catch (error) {
         console.error("Error:", error.message);
     }

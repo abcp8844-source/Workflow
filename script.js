@@ -6,10 +6,11 @@ async function run() {
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
         const $ = cheerio.load(data);
         
-        const title = $('h2').first().text().trim();
-        const description = $('p').first().text().trim().substring(0, 150) + "...";
+        const title = $('h2').not(':contains("Trust")').first().text().trim();
+        const description = $('p').not(':contains("message")').filter((i, el) => $(el).text().length > 50).first().text().trim().substring(0, 200) + "...";
         const link = "https://nuxas-aztr.vercel.app/";
-        const fullMessage = `${title}\n\n${description}\n\n${link}`;
+        
+        const fullMessage = `${title}\n\n${description}\n\nRead more:\n${link}`;
 
         const pageId = "514947098373834";
         const url = `https://graph.facebook.com/v20.0/${pageId}/feed`;

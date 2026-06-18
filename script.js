@@ -6,10 +6,14 @@ async function run() {
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
         const $ = cheerio.load(data);
         
-        const title = $('h2').not(':contains("Trust")').first().text().trim();
-        const description = $('p').not(':contains("message")').filter((i, el) => $(el).text().length > 50).first().text().trim().substring(0, 200) + "...";
-        const link = "https://nuxas-aztr.vercel.app/";
+        // یہاں ہم پہلی ہیڈنگ (NexusHire) کو چھوڑ کر جاب کارڈز والی ہیڈنگ ڈھونڈ رہے ہیں
+        // جاب کارڈز کے ٹائٹل اکثر <h3> یا <h2> میں ہوتے ہیں، ہم پہلے کارڈ کا ٹائٹل اٹھائیں گے
+        const title = $('h3, h2').not(':contains("NexusHire")').first().text().trim();
         
+        // جاب کارڈ کی تفصیل اٹھانا (اگر پیراگراف میں ہے)
+        const description = $('p').not(':contains("NexusHire")').filter((i, el) => $(el).text().length > 30).first().text().trim().substring(0, 200) + "...";
+        
+        const link = "https://nuxas-aztr.vercel.app/";
         const fullMessage = `${title}\n\n${description}\n\nRead more:\n${link}`;
 
         const pageId = "514947098373834";

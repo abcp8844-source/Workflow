@@ -1,31 +1,49 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+let lastPostedTitle = "";
+
 async function run() {
     try {
-        const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
+        const { data } = await axios.get('https://nuxas-aztr.vercel.app/?t=' + new Date().getTime());
         const $ = cheerio.load(data);
         
-        // یہ لائن صرف ان باکسز کو ڈھونڈے گی جن میں جاب کی تفصیل ہوتی ہے
-        // آپ کی ویب سائٹ کے ڈیزائن کے مطابق اسے جاب کارڈز کا پہلا حصہ اٹھانا چاہیے
-        const jobTitle = $('h2, h3').filter((i, el) => $(el).text().length > 10).eq(1).text().trim();
-        const jobDesc = $('p').filter((i, el) => $(el).text().length > 50).eq(1).text().trim().substring(0, 200) + "...";
+        const jobs = [];
         
-        const link = "https://nuxas-aztr.vercel.app/";
-        const message = `${jobTitle}\n\n${jobDesc}\n\nApply here: ${link}`;
+        $('.group').each((i, el) => {
+            const title = $(el).find('h3').text().trim();
+            const company = $(el).find('p').text().trim();
+            const link = $(el).attr('href');
+            
+            if (title) {
+                jobs.push({ title, company, link: `https://nuxas-aztr.vercel.app${link}` });
+            }
+        });
+
+        if (jobs.length === 0) return;
+
+        const latestJob = jobs[0];
+
+        if (latestJob.title === lastPostedTitle) {
+            return;
+        }
+
+        const message = `✨ ${latestJob.title}\n\n🏢 ${latestJob.company}\n\nمزید تفصیلات اور اپلائی کرنے کے لیے ویب سائٹ وزٹ کریں:\n${latestJob.link}\n\n#NexusHire #GlobalJobs #VerifiedOpportunities`;
 
         const pageId = "514947098373834";
         const url = `https://graph.facebook.com/v20.0/${pageId}/feed`;
 
-        const params = new URLSearchParams();
-        params.append('message', message);
-        params.append('access_token', process.env.PAGE_ACCESS_TOKEN);
+        await axios.post(url, {
+            message: message,
+            access_token: process.env.PAGE_ACCESS_TOKEN
+        });
 
-        await axios.post(url, params);
+        lastPostedTitle = latestJob.title;
+        console.log("Successfully posted: " + latestJob.title);
 
-        console.log("Success");
     } catch (error) {
-        console.error("Error:", error.response ? error.response.data : error.message);
+        console.error("Error:", error.message);
     }
 }
+
 run();

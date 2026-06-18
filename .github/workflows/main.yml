@@ -1,7 +1,7 @@
-name: Auto Post to Facebook
+name: Auto Post
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */4 * * *'
   workflow_dispatch:
 
 jobs:

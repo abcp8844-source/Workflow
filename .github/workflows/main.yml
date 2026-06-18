@@ -1,7 +1,7 @@
 name: Auto Post Page
 on:
   schedule:
-    - cron: '0 */6 * * *' # ہر 6 گھنٹے بعد
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,7 +11,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup Node
         uses: actions/setup-node@v2
-        with: {node-version: '16'}
+        with:
+          node-version: '20' # یہاں 16 کی جگہ 20 کر دیں
       - name: Install
         run: npm install axios cheerio
       - name: Run

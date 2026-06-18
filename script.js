@@ -6,23 +6,21 @@ async function run() {
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
         const $ = cheerio.load(data);
         
-        // یہ سلیکٹرز آپ کی ویب سائٹ کے مطابق ہیں
         const title = $('h2').first().text().trim();
         const content = $('p').first().text().trim().substring(0, 150) + "...";
-        const link = "مزید تفصیلات: https://nuxas-aztr.vercel.app/";
+        const link = "https://nuxas-aztr.vercel.app/";
         const message = `${title}\n\n${content}\n\n${link}`;
 
-        const fbUrl = `https://graph.facebook.com/v20.0/${process.env.PAGE_ID}/feed`;
-        
-        await axios.post(fbUrl, null, {
+        await axios.post(`https://graph.facebook.com/v20.0/me/feed`, null, {
             params: {
                 message: message,
                 access_token: process.env.PAGE_ACCESS_TOKEN
             }
         });
-        console.log("پوسٹ کامیابی سے ہو گئی!");
+
+        console.log("Post success");
     } catch (error) {
-        console.error("ایرر:", error.response ? error.response.data : error.message);
+        console.error("Error:", error.response ? error.response.data : error.message);
     }
 }
 run();

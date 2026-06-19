@@ -4,14 +4,24 @@ const fs = require('fs');
 
 async function scrapeToQueue() {
     try {
-        console.log("Scraping started...");
-        const { data } = await axios.get('https://nuxas-aztr.vercel.app/?t=' + new Date().getTime());
+        console.log("Starting scrape...");
+
+        // فائل پڑھنے کا محفوظ طریقہ
+        const readJson = (file) => {
+            if (!fs.existsSync(file)) return [];
+            const content = fs.readFileSync(file, 'utf8').trim();
+            try { return JSON.parse(content || '[]'); } 
+            catch (e) { return []; }
+        };
+
+        const history = readJson('history.json');
+        let pending = readJson('pending_posts.json');
+
+        const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
         const $ = cheerio.load(data);
         
-        const history = JSON.parse(fs.readFileSync('history.json', 'utf8') || '[]');
-        let pending = JSON.parse(fs.readFileSync('pending_posts.json', 'utf8') || '[]');
-
         let foundLinks = [];
+        // ویب سائٹ کا ڈھانچہ چیک کریں، اگر .group نہیں مل رہا تو یہ ایرر دے گا
         $('.group').each((i, el) => {
             const href = $(el).attr('href');
             if (href && href.includes('/jobs/')) {
@@ -23,7 +33,7 @@ async function scrapeToQueue() {
             if (foundLinks.length >= 6) return false;
         });
 
-        console.log("Links found: " + foundLinks.length);
+        console.log("Found " + foundLinks.length + " new jobs.");
 
         for (const link of foundLinks) {
             const { data: jobData } = await axios.get(link);
@@ -37,7 +47,9 @@ async function scrapeToQueue() {
         }
 
         fs.writeFileSync('pending_posts.json', JSON.stringify(pending, null, 2));
-        console.log("Data saved successfully.");
+        fs.writeFileSync('history.json', JSON.stringify(history, null, 2));
+        console.log("Successfully saved data to files.");
+
     } catch (error) {
         console.error("Critical Failure:", error.message);
     }

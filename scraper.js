@@ -4,8 +4,6 @@ const fs = require('fs');
 
 async function scrapeToQueue() {
     try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/?t=' + new Date().getTime());
         const $ = cheerio.load(data);
         
@@ -21,32 +19,23 @@ async function scrapeToQueue() {
                     foundLinks.push(fullLink);
                 }
             }
+            if (foundLinks.length >= 6) return false;
         });
 
-        if (foundLinks.length === 0) return;
+        for (const link of foundLinks) {
+            const { data: jobData } = await axios.get(link);
+            const $$ = cheerio.load(jobData);
 
-        const targetLink = foundLinks[0];
-        const { data: jobData } = await axios.get(targetLink);
-        const $$ = cheerio.load(jobData);
+            const title = $$('h1').text().trim() || $$('h2').first().text().trim();
+            const desc = $$('p').text().trim().substring(0, 100).trim() + "...";
+            const imageUrl = $$('img').first().attr('src');
 
-        const title = $$('h1').text().trim() || $$('h2').first().text().trim();
-        const desc = $$('p').text().trim().substring(0, 100).trim() + "...";
-        const imageUrl = $$('img').first().attr('src');
+            pending.push({ title, description: desc, link, image: imageUrl, timestamp: new Date().toISOString() });
+        }
 
-        const newPost = {
-            title,
-            description: desc,
-            link: targetLink,
-            image: imageUrl,
-            timestamp: new Date().toISOString()
-        };
-
-        pending.push(newPost);
         fs.writeFileSync('pending_posts.json', JSON.stringify(pending, null, 2));
-        console.log("New post added to pending_posts.json:", targetLink);
-
     } catch (error) {
-        console.error("Scraping Error:", error.message);
+        console.error("Error:", error.message);
     }
 }
 

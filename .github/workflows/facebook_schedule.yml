@@ -2,8 +2,8 @@ name: Facebook Auto Poster
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # ہر 3 گھنٹے بعد چلے گا
-  workflow_dispatch:      # مینوئل چلانے کا بٹن
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
 
 jobs:
   post:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Facebook Poster
         env:
-          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+          PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN }}
         run: python facebook_poster.py
 
       - name: Commit and Push changes

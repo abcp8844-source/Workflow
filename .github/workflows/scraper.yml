@@ -15,9 +15,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20'
-      - name: Install Puppeteer
+      - name: Install Puppeteer and Dependencies
         run: |
           npm install puppeteer
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
       - name: Run Scraper
         run: node scraper.js
       - name: Commit Files

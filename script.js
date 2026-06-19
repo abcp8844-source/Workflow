@@ -3,11 +3,23 @@ const cheerio = require('cheerio');
 
 async function run() {
     try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/?t=' + new Date().getTime());
         const $ = cheerio.load(data);
         
-        const jobLink = $('.group').first().attr('href');
-        if (!jobLink) throw new Error("Job link not found.");
+        let jobLink = "";
+        $('.group').each((i, el) => {
+            const href = $(el).attr('href');
+            const text = $(el).text().toLowerCase();
+            
+            if (href && !text.includes('direct access') && !text.includes('verified')) {
+                jobLink = href;
+                return false;
+            }
+        });
+
+        if (!jobLink) throw new Error("No job post found.");
         
         const fullLink = "https://nuxas-aztr.vercel.app" + jobLink;
         const { data: jobData } = await axios.get(fullLink);
@@ -15,9 +27,8 @@ async function run() {
 
         const title = $$('h1').text().trim() || $$('h2').first().text().trim();
         const fullDesc = $$('p').text().trim();
-        
-        // 150 الفاظ کی حد کے اندر ٹائٹل، ڈسکرپشن اور لنک کا حساب
         const shortDesc = fullDesc.substring(0, 100).trim() + "...";
+        
         const message = `${title}\n\n${shortDesc}\n\nApply here: ${fullLink}`;
 
         const payload = {
@@ -31,7 +42,7 @@ async function run() {
 
         console.log("Post ID:", response.data.id);
     } catch (error) {
-        console.error("Error:", error.response ? JSON.stringify(error.response.data) : error.message);
+        console.error("Critical Error:", error.response ? JSON.stringify(error.response.data) : error.message);
     }
 }
 

@@ -17,10 +17,13 @@ jobs:
         run: npm install axios cheerio
       - name: Run Scraper
         run: node scraper.js
+      - name: Create Dummy Files
+        run: |
+          touch pending_posts.json history.json
       - name: Commit Files
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pending_posts.json history.json
-          git commit -m "Update pending posts" || exit 0
+          git commit -m "Update posts data" || echo "No changes to commit"
           git push

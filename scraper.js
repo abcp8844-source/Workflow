@@ -4,11 +4,12 @@ const fs = require('fs');
 
 async function scrapeToQueue() {
     try {
+        console.log("Scraping started...");
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/?t=' + new Date().getTime());
         const $ = cheerio.load(data);
         
-        const history = fs.existsSync('history.json') ? JSON.parse(fs.readFileSync('history.json')) : [];
-        let pending = fs.existsSync('pending_posts.json') ? JSON.parse(fs.readFileSync('pending_posts.json')) : [];
+        const history = JSON.parse(fs.readFileSync('history.json', 'utf8') || '[]');
+        let pending = JSON.parse(fs.readFileSync('pending_posts.json', 'utf8') || '[]');
 
         let foundLinks = [];
         $('.group').each((i, el) => {
@@ -22,6 +23,8 @@ async function scrapeToQueue() {
             if (foundLinks.length >= 6) return false;
         });
 
+        console.log("Links found: " + foundLinks.length);
+
         for (const link of foundLinks) {
             const { data: jobData } = await axios.get(link);
             const $$ = cheerio.load(jobData);
@@ -34,8 +37,9 @@ async function scrapeToQueue() {
         }
 
         fs.writeFileSync('pending_posts.json', JSON.stringify(pending, null, 2));
+        console.log("Data saved successfully.");
     } catch (error) {
-        console.error("Error:", error.message);
+        console.error("Critical Failure:", error.message);
     }
 }
 

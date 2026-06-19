@@ -2,9 +2,16 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 async function scrape() {
-    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({ 
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+    });
     const page = await browser.newPage();
-    await page.goto('https://nuxas-aztr.vercel.app/', { waitUntil: 'networkidle0' });
+    
+    // یہاں ٹائم آؤٹ 60 سیکنڈ کر دیا ہے
+    await page.goto('https://nuxas-aztr.vercel.app/', { 
+        waitUntil: 'networkidle2', 
+        timeout: 60000 
+    });
 
     const jobs = await page.evaluate(() => {
         const items = Array.from(document.querySelectorAll('a'));

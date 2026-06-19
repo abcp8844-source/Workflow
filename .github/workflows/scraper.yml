@@ -17,9 +17,6 @@ jobs:
         run: npm install axios cheerio
       - name: Run Scraper
         run: node scraper.js
-      - name: Create Dummy Files
-        run: |
-          touch pending_posts.json history.json
       - name: Commit Files
         run: |
           git config --local user.email "action@github.com"

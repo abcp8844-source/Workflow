@@ -7,11 +7,14 @@ async function scrape() {
     });
     const page = await browser.newPage();
     
-    // یہاں ٹائم آؤٹ 60 سیکنڈ کر دیا ہے
+    // تبدیلی: networkidle2 ہٹا دیا، domcontentloaded لگا دیا
     await page.goto('https://nuxas-aztr.vercel.app/', { 
-        waitUntil: 'networkidle2', 
+        waitUntil: 'domcontentloaded', 
         timeout: 60000 
     });
+
+    // تھوڑا سا انتظار تاکہ جاوا اسکرپٹ رینڈر ہو جائے
+    await new Promise(r => setTimeout(r, 3000));
 
     const jobs = await page.evaluate(() => {
         const items = Array.from(document.querySelectorAll('a'));

@@ -5,50 +5,47 @@ const fs = require('fs');
 async function scrapeToQueue() {
     try {
         console.log("Starting scrape...");
-
-        // فائل پڑھنے کا محفوظ طریقہ
-        const readJson = (file) => {
-            if (!fs.existsSync(file)) return [];
-            const content = fs.readFileSync(file, 'utf8').trim();
-            try { return JSON.parse(content || '[]'); } 
-            catch (e) { return []; }
-        };
-
-        const history = readJson('history.json');
-        let pending = readJson('pending_posts.json');
-
+        // ویب سائٹ کا مین پیج
         const { data } = await axios.get('https://nuxas-aztr.vercel.app/');
         const $ = cheerio.load(data);
         
+        // یہاں ہم نے سلیکٹر تبدیل کیا ہے۔ 
+        // ہم تمام <a> لنکس ڈھونڈ رہے ہیں جن میں /jobs/ ہے
         let foundLinks = [];
-        // ویب سائٹ کا ڈھانچہ چیک کریں، اگر .group نہیں مل رہا تو یہ ایرر دے گا
-        $('.group').each((i, el) => {
+        $('a').each((i, el) => {
             const href = $(el).attr('href');
             if (href && href.includes('/jobs/')) {
                 const fullLink = "https://nuxas-aztr.vercel.app" + href;
-                if (!history.includes(fullLink) && !pending.find(p => p.link === fullLink)) {
-                    foundLinks.push(fullLink);
-                }
+                foundLinks.push(fullLink);
             }
-            if (foundLinks.length >= 6) return false;
         });
 
-        console.log("Found " + foundLinks.length + " new jobs.");
+        // ڈپلیکیٹ لنکس ہٹا دیں
+        foundLinks = [...new Set(foundLinks)];
+        console.log("Total potential job links found: " + foundLinks.length);
 
+        // ہسٹری چیک
+        const history = JSON.parse(fs.readFileSync('history.json', 'utf8') || '[]');
+        let pending = JSON.parse(fs.readFileSync('pending_posts.json', 'utf8') || '[]');
+        
+        let newJobsFound = 0;
         for (const link of foundLinks) {
-            const { data: jobData } = await axios.get(link);
-            const $$ = cheerio.load(jobData);
-
-            const title = $$('h1').text().trim() || $$('h2').first().text().trim();
-            const desc = $$('p').text().trim().substring(0, 100).trim() + "...";
-            const imageUrl = $$('img').first().attr('src');
-
-            pending.push({ title, description: desc, link, image: imageUrl, timestamp: new Date().toISOString() });
+            if (!history.includes(link) && !pending.find(p => p.link === link)) {
+                // ڈیٹا نکالیں
+                const { data: jobData } = await axios.get(link);
+                const $$ = cheerio.load(jobData);
+                
+                const title = $$('h1').text().trim() || "No Title";
+                const desc = $$('p').text().trim().substring(0, 100).trim() + "...";
+                
+                pending.push({ title, description: desc, link, timestamp: new Date().toISOString() });
+                newJobsFound++;
+            }
+            if (newJobsFound >= 6) break;
         }
 
         fs.writeFileSync('pending_posts.json', JSON.stringify(pending, null, 2));
-        fs.writeFileSync('history.json', JSON.stringify(history, null, 2));
-        console.log("Successfully saved data to files.");
+        console.log("Successfully added " + newJobsFound + " new jobs to queue.");
 
     } catch (error) {
         console.error("Critical Failure:", error.message);

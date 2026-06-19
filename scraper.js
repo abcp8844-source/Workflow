@@ -1,46 +1,34 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-async function scrapeToQueue() {
-    console.log("Launching headless browser...");
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+async function scrape() {
+    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
-    
-    await page.goto('https://nuxas-aztr.vercel.app/', { waitUntil: 'networkidle2' });
-    
-    const links = await page.evaluate(() => {
-        const anchors = Array.from(document.querySelectorAll('a'));
-        return anchors.map(a => a.href).filter(href => href.includes('/jobs/'));
-    });
+    await page.goto('https://nuxas-aztr.vercel.app/', { waitUntil: 'networkidle0' });
 
-    const uniqueLinks = [...new Set(links)];
-    console.log("Total potential job links found: " + uniqueLinks.length);
+    const jobs = await page.evaluate(() => {
+        const items = Array.from(document.querySelectorAll('a'));
+        return items.filter(a => a.href.includes('/jobs/')).map(a => ({
+            link: a.href,
+            title: a.innerText || 'Job Post'
+        }));
+    });
 
     const history = JSON.parse(fs.readFileSync('history.json', 'utf8') || '[]');
     let pending = JSON.parse(fs.readFileSync('pending_posts.json', 'utf8') || '[]');
 
-    let newJobsFound = 0;
-    for (const link of uniqueLinks) {
-        if (!history.includes(link) && !pending.find(p => p.link === link)) {
-            await page.goto(link, { waitUntil: 'networkidle2' });
-            
-            const data = await page.evaluate(() => {
-                return {
-                    title: document.querySelector('h1')?.innerText || document.querySelector('h2')?.innerText || "Job",
-                    desc: document.querySelector('p')?.innerText.substring(0, 100) || "No desc",
-                    image: document.querySelector('img')?.src
-                };
+    for (const job of jobs) {
+        if (!history.includes(job.link) && !pending.find(p => p.link === job.link)) {
+            pending.push({
+                title: job.title,
+                link: job.link,
+                timestamp: new Date().toISOString()
             });
-
-            pending.push({ ...data, link, timestamp: new Date().toISOString() });
-            newJobsFound++;
+            if (pending.length >= 7) break;
         }
-        if (newJobsFound >= 6) break;
     }
 
     fs.writeFileSync('pending_posts.json', JSON.stringify(pending, null, 2));
     await browser.close();
-    console.log("Added " + newJobsFound + " new jobs.");
 }
-
-scrapeToQueue();
+scrape();

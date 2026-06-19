@@ -7,14 +7,17 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: '20'
-      - name: Install Dependencies
-        run: npm install axios cheerio
+      - name: Install Puppeteer
+        run: |
+          npm install puppeteer
       - name: Run Scraper
         run: node scraper.js
       - name: Commit Files
@@ -22,5 +25,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pending_posts.json history.json
-          git commit -m "Update posts data" || echo "No changes to commit"
+          git commit -m "Update data" || echo "No changes"
           git push

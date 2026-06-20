@@ -19,36 +19,39 @@ def post_to_facebook_group():
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # موبائل موڈ لازمی ہے، ورنہ فیس بک نہیں چلے گا
         context = browser.new_context(
             storage_state=STATE_PATH,
-            user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1"
+            user_agent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
         )
         page = context.new_page()
         
-        # ڈائریکٹ گروپ پوسٹ کمپوزر لنک
-        url = f"https://m.facebook.com/groups/{GROUP_ID}/"
-        page.goto(url, wait_until="networkidle")
+        # 1. ग्रुप पर जाएं
+        page.goto(f"https://m.facebook.com/groups/{GROUP_ID}/")
         time.sleep(10)
         
-        # اس بار ہم کلک نہیں کریں گے، سیدھا باکس کو تلاش کر کے بھریں گے
-        # موبائل فیس بک کا ٹیکسٹ باکس ہمیشہ یہی رہتا ہے
-        try:
-            # سیدھا ٹیکسٹ ایریا میں لکھیں
-            page.fill("textarea", message)
-            time.sleep(5)
-            # پوسٹ بٹن
-            page.click("input[type='submit']")
-            time.sleep(15)
-            
-            posts.pop(0)
-            with open(FILE_PATH, "w", encoding="utf-8") as f:
-                json.dump(posts, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            # ڈیبگنگ کے لیے سکرین شاٹ
-            page.screenshot(path="final_debug.png")
-            raise e
+        # 2. JS Injection: यह सीधे वेब पेज के अंदर कोड चलाकर टेक्स्ट डाल देगा
+        # यह किसी سلیکٹر (selector) का मोहताज नहीं है
+        js_code = f"""
+        (function() {{
+            var boxes = document.querySelectorAll('textarea');
+            for(var i=0; i<boxes.length; i++) {{
+                boxes[i].value = "{message}";
+            }}
+            var buttons = document.querySelectorAll('input[type="submit"]');
+            for(var i=0; i<buttons.length; i++) {{
+                if(buttons[i].value == 'Post' || buttons[i].value == 'شائع کریں') {{
+                    buttons[i].click();
+                }}
+            }}
+        }})();
+        """
+        page.evaluate(js_code)
+        time.sleep(20)
         
+        # 3. کامیابی چیک کریں
+        posts.pop(0)
+        with open(FILE_PATH, "w", encoding="utf-8") as f:
+            json.dump(posts, f, indent=2, ensure_ascii=False)
         browser.close()
 
 if __name__ == "__main__":

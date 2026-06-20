@@ -10,46 +10,47 @@ FILE_PATH = "pending_posts.json"
 def post_to_facebook_group():
     if not os.path.exists(FILE_PATH): return
     with open(FILE_PATH, "r", encoding="utf-8") as f:
-        posts = json.load(f)
+        try: posts = json.load(f)
+        except: return
     if not posts: return
 
     current_post = posts[0]
-    # آپ کی مطلوبہ میسج ترتیب
-    message = f"{current_post['title']}\n\nExcellence meets opportunity. At our platform, we believe that your career deserves nothing less than verified precision. We filter out the noise and the scams to bring you only the most authentic, globally verified opportunities.\n\nWe don’t just list jobs; we curate a pathway to professional growth. Experience the standard of verified excellence today.\n\n👉 Apply Here: {current_post['link']}\n\n#CareerExcellence #VerifiedOpportunities #GlobalHiring #ProfessionalGrowth #JobSearch #VerifiedJobs #CareerPath #TopJobs2026 #GlobalCareers #AuthenticOpportunities"
+    message = f"{current_post['title']}\n\nExcellence meets opportunity. At our platform, we believe that your career deserves nothing less than verified precision. We filter out the noise and the scams to bring you only the most authentic, globally verified opportunities.\n\n👉 Apply Here: {current_post['link']}"
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # یہاں موبائل یوزر ایجنٹ سیٹ کر رہے ہیں تاکہ وہ آپ کی کوکیز سے میچ کرے
-        context = browser.new_context(
-            storage_state=STATE_PATH,
-            user_agent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
-        )
+        context = browser.new_context(storage_state=STATE_PATH, user_agent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36")
         page = context.new_page()
         
-        # موبائل ورژن پر نیویگیٹ کریں
-        page.goto(f"https://m.facebook.com/groups/{GROUP_ID}/", wait_until="networkidle")
-        time.sleep(15)
+        # 1. گروپ پیج
+        page.goto(f"https://m.facebook.com/groups/{GROUP_ID}/")
+        page.wait_for_load_state("networkidle")
+        page.screenshot(path="step1_page_load.png") # پہلا قدم
+        time.sleep(5)
 
         try:
-            # پوسٹ باکس ڈھونڈنا (موبائل ویو پر)
-            page.locator("div[class*='_55wr']").first.click()
-            time.sleep(5)
+            # 2. باکس ڈھونڈنا
+            page.get_by_placeholder("Write something...").click()
+            page.screenshot(path="step2_box_clicked.png") # دوسرا قدم
             
-            # ٹائپ کریں
-            page.keyboard.type(message)
-            time.sleep(5)
+            # 3. لکھنا
+            page.keyboard.insert_text(message)
+            time.sleep(2)
             
-            # پوسٹ بٹن (موبائل پر 'Post' بٹن)
-            page.locator("button[value='Post']").click()
-            time.sleep(20)
+            # 4. پوسٹ بٹن
+            page.get_by_role("button", name="Post").click()
+            page.screenshot(path="step3_post_clicked.png") # تیسرا قدم
             
-            # کامیابی کے بعد فائل اپ ڈیٹ
+            time.sleep(10)
+            
+            # کامیابی
             posts.pop(0)
             with open(FILE_PATH, "w", encoding="utf-8") as f:
                 json.dump(posts, f, indent=2, ensure_ascii=False)
+            print("Done.")
             
         except Exception as e:
-            page.screenshot(path="error.png")
+            page.screenshot(path="error_final.png")
             raise e
         finally:
             browser.close()

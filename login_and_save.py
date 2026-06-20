@@ -8,7 +8,7 @@ STATE_PATH = "auth_state.json"
 
 def run_initial_login():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )
@@ -26,7 +26,7 @@ def run_initial_login():
         
         page.click("button[name='login']")
         
-        print("Waiting for login to complete. Solve 2FA if prompted...")
+        print("Waiting for login to complete...")
         page.wait_for_url("https://www.facebook.com/**", timeout=60000)
         
         time.sleep(5)

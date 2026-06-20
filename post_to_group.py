@@ -23,27 +23,24 @@ def post_to_facebook_group():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(storage_state=STATE_PATH, user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         page = context.new_page()
-        
-        # آپ کی حکمت عملی: سیدھا گروپ لنک پر جائیں
-        print(f"Direct navigation to group: {GROUP_ID}")
         page.goto(f"https://www.facebook.com/groups/{GROUP_ID}/", wait_until="networkidle")
-        time.sleep(random.randint(15, 20))
+        time.sleep(20)
 
         try:
-            # پوسٹ باکس ڈھونڈنا
-            post_box = page.locator("div[role='button'][aria-label*='Write something']")
-            if post_box.count() > 0:
-                post_box.first.click()
-            else:
-                page.locator("div.x1i10hfl").first.click()
+            # پوسٹ باکس کلک کریں
+            page.locator("div[role='button']:has-text('Write something')").first.click()
+            time.sleep(10)
             
-            time.sleep(5)
-            page.keyboard.type(message)
-            time.sleep(3)
+            # ٹائپ کریں
+            page.keyboard.type(message, delay=50)
+            time.sleep(10)
             
-            # پوسٹ بٹن
-            page.locator("div[aria-label='Post'][role='button']").click()
-            time.sleep(20)
+            # یہاں پوسٹ بٹن کو ڈھونڈنے کا نیا اور پکا طریقہ
+            # فیس بک کے پوسٹ بٹن کا اصل رول 'button' ہے، اس میں 'Post' ٹیکسٹ ڈھونڈیں
+            post_button = page.locator("div[role='button']:has-text('Post')").last
+            post_button.click(force=True) # force=True سے بٹن کلک ہو جائے گا
+            
+            time.sleep(30)
             
             posts.pop(0)
             with open(FILE_PATH, "w", encoding="utf-8") as f:

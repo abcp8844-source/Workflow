@@ -8,7 +8,6 @@ STATE_PATH = "auth_state.json"
 
 def run_initial_login():
     with sync_playwright() as p:
-        # Launch browser in headed mode to handle login visually if needed
         browser = p.chromium.launch(headless=False)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -27,16 +26,13 @@ def run_initial_login():
         
         page.click("button[name='login']")
         
-        print("Waiting for login to complete. Please solve 2FA or security check in the window if it appears...")
-        # Wait up to 60 seconds for redirecting to facebook home/profile
+        print("Waiting for login to complete. Solve 2FA if prompted...")
         page.wait_for_url("https://www.facebook.com/**", timeout=60000)
         
-        # Extra wait to let cookies settle fully
         time.sleep(5)
         
-        # Save cookies and local storage state into the json file
         context.storage_state(path=STATE_PATH)
-        print(f"Login successful! Session state saved securely to {STATE_PATH}")
+        print(f"Login successful! Session state saved to {STATE_PATH}")
         
         browser.close()
 

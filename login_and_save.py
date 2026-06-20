@@ -9,46 +9,39 @@ STATE_PATH = "auth_state.json"
 def run_initial_login():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
+        # یوزر ایجنٹ کو اپ ڈیٹ رکھیں تاکہ فیس بک سکیورٹی الرٹ نہ دے
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         )
         page = context.new_page()
         
         print("Navigating to Facebook...")
         page.goto("https://www.facebook.com/login")
-        time.sleep(5)
+        
+        # انتظار کریں تاکہ پیج مکمل لوڈ ہو جائے
+        page.wait_for_load_state("networkidle")
         
         print("Entering credentials...")
         page.fill("input[name='email']", FB_EMAIL)
-        time.sleep(1.5)
         page.fill("input[name='pass']", FB_PASSWORD)
-        time.sleep(1.5)
         
-        print("Locating login button...")
-        login_selectors = [
-            "button[name='login']",
-            "button[type='submit']",
-            "[data-testid='royal_login_button']",
-            "text=Log In"
-        ]
+        print("Locating login button safely...")
+        try:
+            # یہ طریقہ "Strict Mode" والے ایرر کو نہیں آنے دے گا
+            login_button = page.get_by_role("button", name="Log In").first
+            login_button.click()
+            print("Successfully clicked login button via Role selector.")
+        except Exception as e:
+            print(f"Role selector failed, trying fallback: {e}")
+            # اگر پہلا طریقہ فیل ہو تو پرانے والے سلیکٹرز پر واپس جائیں
+            page.locator("button[name='login']").click()
         
-        clicked = False
-        for selector in login_selectors:
-            if page.locator(selector).is_visible():
-                page.click(selector)
-                clicked = True
-                print(f"Clicked login button using selector: {selector}")
-                break
-                
-        if not clicked:
-            print("Standard selectors not visible, trying fallback click...")
-            page.click("button")
+        print("Waiting for login to complete...")
+        # فیس بک کے لاگ ان ہونے کا انتظار کریں
+        page.wait_for_load_state("networkidle")
+        time.sleep(10) # سیشن سیو کرنے سے پہلے تھوڑا وقت دیں
         
-        print("Waiting for login to complete. Checking for redirect...")
-        page.wait_for_url("https://www.facebook.com/**", timeout=60000)
-        
-        time.sleep(5)
-        
+        # سیشن اسٹیٹ سیو کریں
         context.storage_state(path=STATE_PATH)
         print(f"Login successful! Session state saved to {STATE_PATH}")
         

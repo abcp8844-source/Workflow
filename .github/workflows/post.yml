@@ -8,6 +8,8 @@ on:
 jobs:
   post:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # فائل اپ ڈیٹ کرنے کے لیے یہ اجازت بہت ضروری ہے
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,14 +23,10 @@ jobs:
         run: |
           pip install playwright
           playwright install chromium
-
-      - name: Download Session Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: fb-auth-session
+          sudo apt-get install -y xvfb
 
       - name: Run Posting Script
-        run: python post_to_group.py
+        run: xvfb-run python post_to_group.py
 
       - name: Commit updated pending list
         run: |

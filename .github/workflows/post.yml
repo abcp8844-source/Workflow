@@ -1,0 +1,39 @@
+name: Auto Post to Facebook Group
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      - name: Download Session Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fb-auth-session
+
+      - name: Run Posting Script
+        run: python post_to_group.py
+
+      - name: Commit updated pending list
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pending_posts.json
+          git diff-index --quiet HEAD || git commit -m "Update pending posts list after successful post"
+          git push

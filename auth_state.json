@@ -1,1 +1,10 @@
-{"cookies": [{"name": "datr", "value": "tOY2aqlWYOIEvGFwfYarV1s4", "domain": ".facebook.com", "path": "/", "expires": 1816542900.851819, "httpOnly": true, "secure": true, "sameSite": "None"}, {"name": "fr", "value": "0lgLzi9Xtdp9iqYKo..BqNua0..AAA.0.0.BqNua0.AWfOAIyXHxMFKQ8arOzBVQ1x2OY", "domain": ".facebook.com", "path": "/", "expires": 1789758900.851946, "httpOnly": true, "secure": true, "sameSite": "None"}, {"name": "sb", "value": "tOY2aulgL3hOTKTfH3WX96pP", "domain": ".facebook.com", "path": "/", "expires": 1816542900.851994, "httpOnly": true, "secure": true, "sameSite": "None"}, {"name": "wd", "value": "1280x720", "domain": ".facebook.com", "path": "/", "expires": 1782587706, "httpOnly": false, "secure": true, "sameSite": "Lax"}, {"name": "csrftoken", "value": "OlQLd6rET3A-JStH3SY26T", "domain": ".instagram.com", "path": "/", "expires": 1816542902.043162, "httpOnly": false, "secure": true, "sameSite": "None"}, {"name": "mid", "value": "ajbmtQALAAEaXfn6ws_y_eIw8cuw", "domain": ".instagram.com", "path": "/", "expires": 1816542902.043206, "httpOnly": true, "secure": true, "sameSite": "None"}, {"name": "timestamp", "value": "178198200908246", "domain": "meta-api.arkoselabs.com", "path": "/", "expires": -1, "httpOnly": false, "secure": true, "sameSite": "None"}], "origins": [{"origin": "https://www.facebook.com", "localStorage": [{"name": "signal_flush_timestamp", "value": "1781982901948"}, {"name": "Session", "value": "0x9ftl:1781982941186"}, {"name": "hb_timestamp", "value": "1781982901927"}, {"name": "banzai:last_storage_flush", "value": "1781982902685"}]}]}
+{
+  "cookies": [
+    {"name": "c_user", "value": "61582178861386", "domain": ".facebook.com", "path": "/", "secure": true, "httpOnly": false, "sameSite": "None"},
+    {"name": "xs", "value": "24%3Ak-WwqI1OQojOFw%3A2%3A1781988157%3A-1%3A-1%3A%3AAczXwUOfKmuWwPh1cNRRudAIuxirFFFR_JiwmDwJqA", "domain": ".facebook.com", "path": "/", "secure": true, "httpOnly": true, "sameSite": "None"},
+    {"name": "datr", "value": "ufo2av1jsQ_LmDQhsq9kXxnj", "domain": ".facebook.com", "path": "/", "secure": true, "httpOnly": true, "sameSite": "None"}
+  ],
+  "origins": [
+    {"origin": "https://m.facebook.com", "localStorage": []}
+  ]
+}

@@ -16,7 +16,7 @@ def run_initial_login():
         
         print("Navigating to Facebook...")
         page.goto("https://www.facebook.com/login")
-        time.sleep(3)
+        time.sleep(5)
         
         print("Entering credentials...")
         page.fill("input[name='email']", FB_EMAIL)
@@ -24,9 +24,27 @@ def run_initial_login():
         page.fill("input[name='pass']", FB_PASSWORD)
         time.sleep(1.5)
         
-        page.click("button[name='login']")
+        print("Locating login button...")
+        login_selectors = [
+            "button[name='login']",
+            "button[type='submit']",
+            "[data-testid='royal_login_button']",
+            "text=Log In"
+        ]
         
-        print("Waiting for login to complete...")
+        clicked = False
+        for selector in login_selectors:
+            if page.locator(selector).is_visible():
+                page.click(selector)
+                clicked = True
+                print(f"Clicked login button using selector: {selector}")
+                break
+                
+        if not clicked:
+            print("Standard selectors not visible, trying fallback click...")
+            page.click("button")
+        
+        print("Waiting for login to complete. Checking for redirect...")
         page.wait_for_url("https://www.facebook.com/**", timeout=60000)
         
         time.sleep(5)

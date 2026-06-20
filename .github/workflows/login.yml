@@ -6,6 +6,8 @@ on:
 jobs:
   login:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # یہ لائن فائل کو ریپو میں سیو کرنے کے لیے ضروری ہے
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,9 +29,10 @@ jobs:
           FB_PASSWORD: ${{ secrets.FB_PASSWORD }}
         run: xvfb-run python login_and_save.py
 
-      - name: Upload Session Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fb-auth-session
-          path: auth_state.json
-          retention-days: 90
+      - name: Save Session to Repository
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add auth_state.json
+          git commit -m "Update session state [skip ci]" || echo "No changes to commit"
+          git push

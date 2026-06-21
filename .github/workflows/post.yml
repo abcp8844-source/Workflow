@@ -19,18 +19,20 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip install requests
+        run: |
+          pip install playwright
+          playwright install chromium
+          sudo apt-get install -y xvfb
 
       - name: Run Posting Script
         env:
           PAGE_ID: ${{ secrets.PAGE_ID }}
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: python post_to_page.py
+        run: xvfb-run python post_to_page.py
 
       - name: Commit updated list
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pending_posts.json
-          git diff-index --quiet HEAD || git commit -m "Post success, updating list"
+          git diff-index --quiet HEAD || git commit -m "Update post list"
           git push

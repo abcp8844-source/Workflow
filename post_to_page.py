@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from datetime import datetime
 
 PAGE_ID = "514947098373834"
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
@@ -21,7 +22,19 @@ def post_to_facebook_page():
 
     current_post = posts[0]
     
+    # تاریخ، مہینہ اور سال کو ترتیب دینے کا طریقہ
+    raw_date = current_post.get('timestamp', '')
+    formatted_date = ""
+    if raw_date:
+        try:
+            # ISO ڈیٹ (2026-06-20T...) سے صرف تاریخ کا حصہ نکالنا
+            date_obj = datetime.strptime(raw_date.split('T')[0], '%Y-%m-%d')
+            formatted_date = f"📅 DATE: {date_obj.strftime('%d-%m-%Y')}\n"
+        except:
+            pass
+
     message = (
+        f"{formatted_date}"
         f"🌟 {current_post.get('title', '').upper()}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "Hello everyone,\n\n"
@@ -33,7 +46,6 @@ def post_to_facebook_page():
         "#JobSearch #VerifiedJobs #CareerPath #TopJobs2026"
     )
 
-    
     url = f"https://graph.facebook.com/v25.0/{PAGE_ID}/feed"
     payload = {
         "message": message,

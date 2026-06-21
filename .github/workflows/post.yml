@@ -1,39 +1,26 @@
-name: Auto Post to Facebook Page
-
+name: Auto Post to Page
 on:
-  schedule:
-    - cron: '0 */3 * * *'
   workflow_dispatch:
-
 jobs:
   post:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    permissions: contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.10'}
+      - run: |
           pip install playwright
           playwright install chromium
           sudo apt-get install -y xvfb
-
-      - name: Run Posting Script
+      - name: Run script
         env:
           PAGE_ID: ${{ secrets.PAGE_ID }}
         run: xvfb-run python post_to_page.py
-
-      - name: Commit updated pending list
+      - name: Commit changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pending_posts.json
-          git diff-index --quiet HEAD || git commit -m "Update pending posts after successful post"
+          git diff-index --quiet HEAD || git commit -m "Update list"
           git push

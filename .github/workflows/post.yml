@@ -1,4 +1,4 @@
-name: Auto Post to Facebook Group
+name: Auto Post to Facebook Page
 
 on:
   schedule:
@@ -9,7 +9,7 @@ jobs:
   post:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # فائل اپ ڈیٹ کرنے کے لیے یہ اجازت بہت ضروری ہے
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,12 +26,14 @@ jobs:
           sudo apt-get install -y xvfb
 
       - name: Run Posting Script
-        run: xvfb-run python post_to_group.py
+        env:
+          PAGE_ID: ${{ secrets.PAGE_ID }}
+        run: xvfb-run python post_to_page.py
 
       - name: Commit updated pending list
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pending_posts.json
-          git diff-index --quiet HEAD || git commit -m "Update pending posts list after successful post"
+          git diff-index --quiet HEAD || git commit -m "Update pending posts after successful post"
           git push

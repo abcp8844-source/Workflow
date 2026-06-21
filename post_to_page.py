@@ -1,7 +1,6 @@
 import os
 import json
 import time
-import random
 from playwright.sync_api import sync_playwright
 
 PAGE_ID = os.environ.get("PAGE_ID")
@@ -16,7 +15,6 @@ def post_to_facebook_page():
     if not posts: return
 
     current_post = posts[0]
-    
     message = (
         f"🌟 {current_post.get('title', '').upper()}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -26,7 +24,7 @@ def post_to_facebook_page():
         f"🔗 Apply Here: {current_post.get('link', '')}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "#CareerExcellence #VerifiedOpportunities #GlobalHiring #ProfessionalGrowth "
-        "#JobSearch #VerifiedJobs #CareerPath #TopJobs2026 #GlobalCareers #AuthenticOpportunities"
+        "#JobSearch #VerifiedJobs #CareerPath #TopJobs2026"
     )
 
     with sync_playwright() as p:
@@ -37,32 +35,23 @@ def post_to_facebook_page():
         )
         page = context.new_page()
         page.goto(f"https://www.facebook.com/{PAGE_ID}")
-        time.sleep(random.randint(35, 45))
         
+        # کل والا تیز طریقہ
+        time.sleep(15) 
         try:
-            post_box = page.locator("[role='button']:has-text('Write something')")
-            if post_box.first.is_visible():
-                post_box.first.click()
-            
-            time.sleep(random.randint(12, 18))
-            editor = page.locator("[role='dialog'] [role='textbox']")
-            editor.focus()
-            
-            for char in message:
-                editor.type(char, delay=random.uniform(0.03, 0.09))
-            
+            page.click("[role='button']:has-text('Write something')")
             time.sleep(5)
+            editor = page.locator("[role='dialog'] [role='textbox']")
+            editor.fill(message) # ٹائپنگ کی بجائے فل کرنا تیز ہے
+            time.sleep(3)
             page.click("[role='dialog'] [role='button']:has-text('Post')")
-            time.sleep(25)
+            time.sleep(10)
             
             posts.pop(0)
             with open(FILE_PATH, "w", encoding="utf-8") as f:
                 json.dump(posts, f, indent=2, ensure_ascii=False)
-            
-            context.storage_state(path=STATE_PATH)
         except Exception as e:
             page.screenshot(path="error.png")
-            
         browser.close()
 
 if __name__ == "__main__":

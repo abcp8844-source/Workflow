@@ -2,7 +2,8 @@ import os
 import json
 import requests
 
-PAGE_ID = os.environ.get("PAGE_ID")
+# آپ کی پیج آئی ڈی
+PAGE_ID = "514947098373834"
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 FILE_PATH = "pending_posts.json"
 
@@ -45,6 +46,7 @@ def post_to_facebook_page():
         posts.pop(0)
         with open(FILE_PATH, "w", encoding="utf-8") as f:
             json.dump(posts, f, indent=2, ensure_ascii=False)
+        print("Post successful!")
     else:
         print(f"Error: {response.text}")
 

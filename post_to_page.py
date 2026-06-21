@@ -4,35 +4,30 @@ import time
 import random
 from playwright.sync_api import sync_playwright
 
-GROUP_ID = "1403757117731031"
+PAGE_ID = os.environ.get("PAGE_ID")
 STATE_PATH = "auth_state.json"
 FILE_PATH = "pending_posts.json"
 
-def post_to_facebook_group():
+def post_to_facebook_page():
     if not os.path.exists(FILE_PATH): return
-
     with open(FILE_PATH, "r", encoding="utf-8") as f:
         try: posts = json.load(f)
         except: return
-
     if not posts: return
 
     current_post = posts[0]
-    title = current_post.get("title", "")
-    link = current_post.get("link", "")
-
-    brand_intro = (
+    
+    message = (
+        f"🌟 {current_post.get('title', '').upper()}\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "Hello everyone,\n\n"
         "Excellence meets opportunity. At our platform, we believe that your career deserves nothing less than verified precision. We filter out the noise and the scams to bring you only the most authentic, globally verified opportunities.\n\n"
-        "We don’t just list jobs; we curate a pathway to professional growth. Experience the standard of verified excellence today."
-    )
-
-    hashtags = (
-        "\n\n#CareerExcellence #VerifiedOpportunities #GlobalHiring #ProfessionalGrowth "
+        "We don’t just list jobs; we curate a pathway to professional growth. Experience the standard of verified excellence today.\n\n"
+        f"🔗 Apply Here: {current_post.get('link', '')}\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "#CareerExcellence #VerifiedOpportunities #GlobalHiring #ProfessionalGrowth "
         "#JobSearch #VerifiedJobs #CareerPath #TopJobs2026 #GlobalCareers #AuthenticOpportunities"
     )
-
-    message = f"{title}\n\n\n{brand_intro}\n\n👉 Apply Here: {link}{hashtags}"
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -41,7 +36,7 @@ def post_to_facebook_group():
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )
         page = context.new_page()
-        page.goto(f"https://www.facebook.com/groups/{GROUP_ID}")
+        page.goto(f"https://www.facebook.com/{PAGE_ID}")
         time.sleep(random.randint(35, 45))
         
         try:
@@ -71,4 +66,4 @@ def post_to_facebook_group():
         browser.close()
 
 if __name__ == "__main__":
-    post_to_facebook_group()
+    post_to_facebook_page()

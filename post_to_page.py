@@ -2,7 +2,6 @@ import os
 import json
 import requests
 
-# آپ کی پیج آئی ڈی
 PAGE_ID = "514947098373834"
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 FILE_PATH = "pending_posts.json"
@@ -34,7 +33,8 @@ def post_to_facebook_page():
         "#JobSearch #VerifiedJobs #CareerPath #TopJobs2026"
     )
 
-    url = f"https://graph.facebook.com/{PAGE_ID}/feed"
+    
+    url = f"https://graph.facebook.com/v25.0/{PAGE_ID}/feed"
     payload = {
         "message": message,
         "access_token": ACCESS_TOKEN

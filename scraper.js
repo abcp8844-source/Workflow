@@ -8,7 +8,7 @@ async function scrape() {
     const page = await browser.newPage();
     
     // تبدیلی: networkidle2 ہٹا دیا، domcontentloaded لگا دیا
-    await page.goto('https://nuxas-aztr.vercel.app/', { 
+    await page.goto('https://zunexhire.com/', { 
         waitUntil: 'domcontentloaded', 
         timeout: 60000 
     });

@@ -22,28 +22,29 @@ def post_to_facebook_page():
 
     current_post = posts[0]
     
-    # تاریخ، مہینہ اور سال کو ترتیب دینے کا طریقہ
     raw_date = current_post.get('timestamp', '')
     formatted_date = ""
     if raw_date:
         try:
-            # ISO ڈیٹ (2026-06-20T...) سے صرف تاریخ کا حصہ نکالنا
             date_obj = datetime.strptime(raw_date.split('T')[0], '%Y-%m-%d')
             formatted_date = f"📅 DATE: {date_obj.strftime('%d-%m-%Y')}\n"
         except:
             pass
 
+    post_title = current_post.get('title', '')
+    post_description = current_post.get('description', '')
+    post_link = current_post.get('link', '')
+
     message = (
         f"{formatted_date}"
-        f"🌟 {current_post.get('title', '').upper()}\n\n"
+        f"🌟 {post_title.upper()}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "Hello everyone,\n\n"
-        "Excellence meets opportunity. At our platform, we believe that your career deserves nothing less than verified precision. We filter out the noise and the scams to bring you only the most authentic, globally verified opportunities.\n\n"
-        "We don’t just list jobs; we curate a pathway to professional growth. Experience the standard of verified excellence today.\n\n"
-        f"🔗 Apply Here: {current_post.get('link', '')}\n\n"
+        f"{post_description}\n\n"
+        f"🔗 Apply Here: {post_link}\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "🌐 zunexhire.com\n\n"
         "#CareerExcellence #VerifiedOpportunities #GlobalHiring #ProfessionalGrowth "
-        "#JobSearch #VerifiedJobs #CareerPath #TopJobs2026"
+        "#JobSearch #VerifiedJobs #CareerPath #job #visa #travel #zunexhire #TopJobs2026"
     )
 
     url = f"https://graph.facebook.com/v25.0/{PAGE_ID}/feed"

@@ -27,7 +27,7 @@ def post_to_facebook_page():
     if raw_date:
         try:
             date_obj = datetime.strptime(raw_date.split('T')[0], '%Y-%m-%d')
-            formatted_date = f"📅 DATE: {date_obj.strftime('%d-%m-%Y')}\n"
+            formatted_date = f"📅 Date: {date_obj.strftime('%d-%m-%Y')}\n\n"
         except:
             pass
 
@@ -36,13 +36,11 @@ def post_to_facebook_page():
     post_link = current_post.get('link', '')
 
     message = (
-        f"{formatted_date}"
-        f"🌟 {post_title.upper()}\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🌟 {post_title}\n\n"
         f"{post_description}\n\n"
         f"🔗 Apply Here: {post_link}\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n"
-        "🌐 zunexhire.com\n\n"
+        f"{formatted_date}"
+        "🌐 Visit: zunexhire.com\n\n"
         "#CareerExcellence #VerifiedOpportunities #GlobalHiring #ProfessionalGrowth "
         "#JobSearch #VerifiedJobs #CareerPath #job #visa #travel #zunexhire #TopJobs2026"
     )

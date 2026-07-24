@@ -42,7 +42,7 @@ def enhance_caption_with_gemini(title, description, link, formatted_date):
         """
         
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.1-flash-lite',
             contents=prompt
         )
         return response.text.strip()
@@ -102,7 +102,7 @@ def post_to_facebook_page():
         posts.pop(0)
         with open(FILE_PATH, "w", encoding="utf-8") as f:
             json.dump(posts, f, indent=2, ensure_ascii=False)
-        print("Post successful with Gemini enhancement and image!")
+        print("Post successful with Gemini 3.1 Flash-Lite enhancement and image!")
     else:
         print(f"Error: {response.text}")
 

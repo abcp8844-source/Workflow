@@ -5,6 +5,7 @@ from datetime import datetime
 from google import genai
 
 PAGE_ID = "514947098373834"
+GROUP_ID = "1403757117731031"  # آپ کے گروپ کی آئی ڈی
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") 
 FILE_PATH = "pending_posts.json"
@@ -58,7 +59,7 @@ def enhance_caption_with_gemini(title, description, link, formatted_date):
             "#JobSearch #VerifiedJobs #CareerPath #job #visa #travel #zunexhire #TopJobs2026"
         )
 
-def post_to_facebook_page():
+def post_to_facebook():
     if not os.path.exists(FILE_PATH):
         return
     
@@ -89,22 +90,43 @@ def post_to_facebook_page():
 
     final_message = enhance_caption_with_gemini(post_title, post_description, post_link, formatted_date)
 
-    url = f"https://graph.facebook.com/v25.0/{PAGE_ID}/photos"
-    payload = {
+    # 1. پہلے فیس بک پیج پر فوٹو پوسট کریں
+    url_page = f"https://graph.facebook.com/v25.0/{PAGE_ID}/photos"
+    payload_page = {
         "message": final_message,
         "url": post_image,
         "access_token": ACCESS_TOKEN
     }
     
-    response = requests.post(url, data=payload)
+    response = requests.post(url_page, data=payload_page)
     
     if response.status_code == 200:
+        res_data = response.json()
+        page_post_id = res_data.get('post_id') or res_data.get('id')
+        print("Post successful on Page!")
+
+        # 2. پیج پر پوسট ہونے کے بعد اسے گروپ میں شیئر کریں
+        if page_post_id:
+            url_group = f"https://graph.facebook.com/v25.0/{GROUP_ID}/feed"
+            # پیج کی بنائی گئی پوسট کا لنک یا آئی ڈی گروپ میں بھیجی جا ਰہی है
+            payload_group = {
+                "link": f"https://www.facebook.com/{page_post_id}",
+                "message": "🌟 New verified opportunity shared from our official page! Check it out below 👇",
+                "access_token": ACCESS_TOKEN
+            }
+            group_response = requests.post(url_group, data=payload_group)
+            if group_response.status_code == 200:
+                print("Post successfully shared to the Facebook Group!")
+            else:
+                print(f"Group Share Warning: {group_response.text}")
+
+        # 3. ڈیٹا سے پوسٹ ہٹا کر فائل اپڈیট کریں
         posts.pop(0)
         with open(FILE_PATH, "w", encoding="utf-8") as f:
             json.dump(posts, f, indent=2, ensure_ascii=False)
-        print("Post successful with Gemini 3.1 Flash-Lite enhancement and image!")
+        print("pending_posts.json updated successfully!")
     else:
-        print(f"Error: {response.text}")
+        print(f"Error on Page Post: {response.text}")
 
 if __name__ == "__main__":
-    post_to_facebook_page()
+    post_to_facebook()

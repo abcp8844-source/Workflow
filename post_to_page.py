@@ -25,8 +25,8 @@ def enhance_caption_with_gemini(title, description, link, formatted_date):
         client = genai.Client(api_key=GEMINI_API_KEY)
         
         prompt = f"""
-        You are an expert social media manager for 'zunexhire.com'. 
-        Rewrite and enhance the following job/travel post to make it extremely engaging, professional, and trending on Facebook.
+        You are an expert social media manager for 'zunexhire.com #zunexhire'. 
+        Rewrite and enhance the following job/travel post to make it extremely engaging, professional, and trending on Facebook.and add all post #zunexhire.com
         
         Original Title: {title}
         Original Description: {description}
